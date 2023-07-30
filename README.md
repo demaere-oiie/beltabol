@@ -37,7 +37,7 @@ Print calc expand("",eg)
 
 ## goals
 
-The main idea is to play with rpython and [rply](https://rply.readthedocs.io/en/latest/); in fact the staged nature of rpython worked out very nicely, as one can use full python metagprogramming to aid with the grammar/ast interface (cf the [parser](src/parser.py) source), while sticking with rpython for the (tree walking) interpreter results in ~50 times performance improvement compared to cpython.
+The main idea is to play with rpython and [rply](https://rply.readthedocs.io/en/latest/); in fact the staged nature of rpython worked out very nicely, as one can use full python metagprogramming to aid with the grammar/ast interface (cf the [parser](https://github.com/demaere-oiie/beltabol/blob/4acd8c2364740ef7a4d8ae466dc7aadedd4bad46/src/parser.py#L51-L115) source), while sticking with rpython for the (tree walking) interpreter results in ~50 times performance improvement compared to cpython.
 
 ## current state
 
