@@ -1,1 +1,12 @@
+// run me with the "--boring" flag
 
+Print "aaaaaabaabaab".
+Print calc expand("",eg)
+  where eg          := [Lit("a"),Ptr(0,5),Lit("b"),Ptr(4,6)];
+  where good        := "aaaaaabaabaab";
+  where expand(a,c) := (pick
+        expand(a++v  ,              t) when c?=Lit(v)  ++t;
+        expand(a     ,              t) when c?=Ptr(s,0)++t;
+        expand(a++a@s,Ptr(s+1,n-1)++t) when c?=Ptr(s,n)++t;
+               a                       when otherwise);
+  where Comp        ::= Lit(v) | Ptr(s,l).
