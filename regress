@@ -1,0 +1,1 @@
+for f in tst/*.bb; do echo ====$f; python src/bb.py --test < $f; done

@@ -1,0 +1,1 @@
+for f in tst/*.bb; do echo ====$f; bin/bb --test < $f; done
