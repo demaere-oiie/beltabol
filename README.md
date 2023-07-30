@@ -21,7 +21,7 @@ Da filter(p) im fong g
 
 (in fact, the higher-order function `walowda` from the first example is written in BELTABOL itself, and provided in the standard prelude.)
 
-For those who really must have it, a `--boring` flag to the (interpreter)[doc/terp.md] allows the use of english keywords:
+For those who really must have it, a `--boring` flag to the [interpreter](doc/terp.md) allows the use of english keywords:
 ```
 Print "aaaaaabaabaab".
 Print calc expand("",eg)
