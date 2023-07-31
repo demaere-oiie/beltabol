@@ -67,9 +67,6 @@ class Agg(Box):
         self.l = l
         self.r = r
 
-class Bogus(Box):
-    pass
-
 def getlist(o):
     if isinstance(o,ListSep): return getlist(o.l)+getlist(o.r)
     if isinstance(o,Nil):   return []

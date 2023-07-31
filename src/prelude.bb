@@ -2,9 +2,14 @@ Da owta im 1.
 
 Da max(x,y) im chu y detim x<=y; x detim owta.
 
+Da mebi(f) im fong g
+   wit g(x) deting (fong f(w)
+      wit w delowda [x]).
+
 Da walowda(f) im fong g
-    wit g(x) deting (fong (chu x  detim y==x;
-                             g(y) detim owta) wit y deting f(x)).
+    wit g(x) deting (fong (chu x  detim y==[];
+                               x  detim y==[x];
+                           g(y@0) detim owta) wit y deting mebi(f)(x)).
 
 // after Dijkstra
 Da sqrt(n) im fong go(0,n+1)

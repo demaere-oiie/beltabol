@@ -88,7 +88,8 @@ class Fong(Box):
             return List(self.rev.reval(env1))
 
     def reval(self,env):
-        return [self.e.eval(env)]
+        y = self.e.eval(env)
+        return [y] if y is not None else []
 
 class CDecls(Box):
     def __init__(self,l,ls=None):
@@ -140,12 +141,10 @@ class FDecls(Box):
     def reval(self,env):
         u = self.u
         assert isinstance(u,FDecl)
-        u.eval(env)
         if not u.lctx:
+            u.eval(env)
             return self.l.reval(env)
-        i = u.i
-        assert isinstance(i,Id)
-        ll = env[i.i]
+        ll = u.e.eval(env)
         if isinstance(ll,List):
             s = ll.s
         elif isinstance(ll,Str):
@@ -155,7 +154,9 @@ class FDecls(Box):
         rv = []
         for si in s:
             nenv = Env(env) # or do escape analysis?
-            nenv[i.i] = si
+            u = self.u
+            assert isinstance(u,FDecl)
+            u.i.match(si,nenv)
             rv.extend(self.l.reval(nenv))
         return rv
 
@@ -168,6 +169,7 @@ class FDecl(Box):
 
     def eval(self,env):
         i = self.i
+
         if isinstance(i, Id):
             env[i.i] = self.e.eval(env)
         elif isinstance(i, App):
@@ -204,24 +206,29 @@ class App(PatSyntax):
 
     def eval(self,env):
         s = self.x.eval(env)
-        t = (self.f.eval(env)).apply(s,env)
-        return t if t is not None else s
+        return (self.f.eval(env)).apply(s,env)
 
     def match(self,v,env):
         q = self.f.eval(env)
-        assert isinstance(q,Construct)
-        assert isinstance(v,Data)
-        if v.b!=q.b: return False
-        subs = getlist(self.x)
-        if len(subs)!=q.a: return False
-        #for w,s in zp(v.v,subs):
-        #    print("%s?=%s %s" % (w,s,match(w,s,env)))
-        for i in range(len(v.v)):
-            w = v.v[i]
-            s = subs[i]
-            if not s.match(w,env):
+        if isinstance(q,Construct):
+            assert isinstance(v,Data)
+            if v.b!=q.b: return False
+            subs = getlist(self.x)
+            if len(subs)!=q.a: return False
+            #for w,s in zp(v.v,subs):
+            #    print("%s?=%s %s" % (w,s,match(w,s,env)))
+            for i in range(len(v.v)):
+                w = v.v[i]
+                s = subs[i]
+                if not s.match(w,env):
+                    return False
+            return True
+        elif isinstance(q,Clo):
+            b = q.apply(v,env)
+            if not isinstance(b,Num) or b.v!=1:
                 return False
-        return True
+            return self.x.match(v,env)
+        return False
 
     def __str__(self):
         return "%s(%s)" % (self.f,self.x)
