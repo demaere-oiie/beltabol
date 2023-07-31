@@ -29,3 +29,30 @@ Du chek (foo@0)(0) im 4.
 Du chek (foo@2)(0) im 6.
 
 Du chek (fong ord(c) wit c delowda "foo") im [102,111,111].
+
+Da zip(xs,ys) im chu
+    [x,y]<:zip(xt,yt) detim xs?=x<:xt && ys?=y<:yt;
+    []                detim xs==[];
+    []                detim ys==[];
+    [[xs@0,ys@0]]     detim owta.
+
+Du chek zip("foobar","bletc") im [["f","b"],["o","l"],["o","e"],
+                                  ["b","t"],["a","c"]].
+
+Du chek (fong x:=:y
+    wit [x,y] delowda zip("foobar","bletch"))
+im ["fb","ol","oe","bt","ac","rh"].
+
+Da map(f) im fong g
+    wit g(xs) deting (fong f(x) wit x delowda xs).
+
+Da inc(n) im n+1.
+
+Du chek map(inc) $ iota(3) im [1,2,3].
+
+Da filter(p) im fong g
+    wit g(xs) deting (fong x wit p(x) delowda xs).
+
+Da even(n) im chu 1 detim n `mod` 2 == 0.
+
+Du chek filter(even) $ iota(4) im [0,2].

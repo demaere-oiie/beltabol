@@ -16,10 +16,10 @@ Da filter(p) im fong g
     wit g(x) deting (chu
         g(h):=:g(t) detim x?=h:=:t;
         x           detim x?=[i] && p(i);
-        x           detim p(x);
+        x           detim ""<=x && p(x);
         unit(x)     detim owta).
 
-Da even(n) im chu 1 detim n?=0++_; 0 detim owta.
+Da even(n) im chu 0 detim n?=1++_; 1 detim owta.
 
 Du chek map(ord)("foobar") im [102,111,111,98,97,114].
 Du chek reduce((:=:)) $ map(chr) $ map(ord) $ "foobar" im "foobar".
