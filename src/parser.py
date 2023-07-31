@@ -77,6 +77,7 @@ Gram("""
     rdecls : fdecl                 $$ idem 0
 
     fdecl : WIT expr DETING expr   $$ FDecl 1 3
+    fdecl : WIT expr DELOWDA expr  $$ FDecl 1 3 2
     fdecl : WIT expr IMALOWDA expr $$ DaImalowda 1 3
 
     ### Simple expressions ###################################

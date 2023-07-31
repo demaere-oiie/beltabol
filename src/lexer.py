@@ -1,7 +1,7 @@
 from rply import LexerGenerator, Token
 
 rsvd = {t:t.upper() for t in """
-Da Du Showxa chek chu detim deting fong im imalowda unte wit 
+Da Du Showxa chek chu delowda detim deting fong im imalowda unte wit
 """.split()}
 
 Tab = lambda s: [l.split() for l in s.split('\n') if ' ' in l]

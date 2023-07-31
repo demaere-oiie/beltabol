@@ -1,7 +1,7 @@
 from errors import Chek
 from semantic import Construct, Data, Lambda, Num, Str, PatSyntax
 from semantic import Seq, Nil, Id, fresh, getlist, newBrand, List, Clo
-from semantic import ListSep, Agg, Box
+from semantic import ListSep, Agg, Box, Env
 
 class Program(Box):
     def __init__(self,s,p=None):
@@ -39,6 +39,7 @@ class DaImalowda(Box):
     def __init__(self,e,d):
         self.e = e
         self.d = d
+        self.lctx = False
 
     def eval(self,env):
         for a in getalts(self.d):
@@ -69,13 +70,25 @@ class Fong(Box):
     def __init__(self,e,f):
         self.e = e
         self.f = f
+        if self.f is not None:
+            f = self.f
+            assert isinstance(f,FDecls)
+            if f.lctx:
+                self.rev = f.mkrev(Fong(e,None))
 
     def eval(self,env):
         assert isinstance(self.e,Box)
-        assert isinstance(self.f,Box)
+        f = self.f
+        assert isinstance(f,FDecls)
         env1 = fresh(env)
-        self.f.eval(env1)
-        return self.e.eval(env1)
+        if not f.lctx:
+            f.eval(env1)
+            return self.e.eval(env1)
+        else:
+            return List(self.rev.reval(env1))
+
+    def reval(self,env):
+        return [self.e.eval(env)]
 
 class CDecls(Box):
     def __init__(self,l,ls=None):
@@ -107,16 +120,51 @@ class FDecls(Box):
     def __init__(self,u,l=None):
         self.u = u
         self.l = l
+        self.lctx = False
+        if isinstance(u,FDecl):
+            self.lctx = self.lctx or u.lctx
+        if isinstance(l,FDecls):
+            self.lctx = self.lctx or l.lctx
 
     def eval(self,env):
         if self.l is not None:
             self.l.eval(env)
         self.u.eval(env)
 
+    def mkrev(self,acc):
+        if self.l is None:
+            return FDecls(self.u,acc)
+        else:
+            return self.l.mkrev(FDecls(self.u,acc))
+
+    def reval(self,env):
+        u = self.u
+        assert isinstance(u,FDecl)
+        u.eval(env)
+        if not u.lctx:
+            return self.l.reval(env)
+        i = u.i
+        assert isinstance(i,Id)
+        ll = env[i.i]
+        if isinstance(ll,List):
+            s = ll.s
+        elif isinstance(ll,Str):
+            s = [Str(c) for c in ll.s]
+        else:
+            s = []
+        rv = []
+        for si in s:
+            nenv = Env(env) # or do escape analysis?
+            nenv[i.i] = si
+            rv.extend(self.l.reval(nenv))
+        return rv
+
+
 class FDecl(Box):
-    def __init__(self,i,e):
+    def __init__(self,i,e,lctx=None):
         self.i = i
         self.e = e
+        self.lctx = lctx is not None
 
     def eval(self,env):
         i = self.i
@@ -133,6 +181,7 @@ class RDecl(Box):
     def __init__(self,l,r):
         self.l = l
         self.r = r
+        self.lctx = False
 
     def eval(self,env):
         f = self.l

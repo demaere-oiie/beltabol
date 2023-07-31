@@ -17,6 +17,12 @@ class Nil(PatSyntax):
     def apply(self,other,env):
         return other
 
+    def match(self,other,env):
+        return isinstance(other,Nil)
+
+    def eq(self,other):
+        return Num(1 if isinstance(other,Nil) else 0)
+
 class ListSep(Box):
     pass
 
@@ -279,7 +285,7 @@ class List(PatSyntax):
         return List([x.eval(env) for x in self.s])
 
     def __str__(self):
-        return "List(%s)" % ([str(x) for x in self.s],)
+        return "List(%s)" % ([x.__str__() for x in self.s],)
 
 class Str(PatSyntax):
     def __init__(self,s):
