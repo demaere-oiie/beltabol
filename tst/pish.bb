@@ -3,13 +3,12 @@
 
 Da we(peyeting,pish) im chu
     1                     detim peyeting==0;
-    0                     detim pish==[0];
+    0                     detim pish==[];
     we(peyeting,mali)     detim pish?=bik++mali && bik>peyeting;
     we(peyeting,mali)+
-    we(peyeting-bik,pish) detim pish?=bik++mali;
-    0                     detim owta.
+    we(peyeting-bik,pish) detim pish?=bik++mali.
 
-Da pish im [50,20,10,5,2,1,0].
+Da pish im [50,20,10,5,2,1].
 
 Du chek we(0,pish) im 1.
 Du chek we(1,pish) im 1.
