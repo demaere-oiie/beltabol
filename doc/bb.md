@@ -12,6 +12,8 @@ Cf [the source](../src/lexer.py) for full details.
 
 ## Grammar
 
+![remerciements à https://jacquev6.github.io/DrawGrammar/](gram.png)
+
 ### Statements
 
 There are four statements:
