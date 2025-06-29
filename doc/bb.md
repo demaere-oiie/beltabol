@@ -52,6 +52,8 @@ There are two compound expressions:
 
 2. `Fong` is like Lisp's LET (or an "identity monad"), and the expression is evaulated in the environment of the following local definitions. (of the form `WIT expr DETING expr`, corresponding to `DA ... IM ...` at the top level, or of the form `WIT expr IMALOWDA expr`, corresponding to `DA ... IMALOWDA ...` at the top level) Each definition is in scope for itself and the definitions before it; to obtain mutually recursive definitions group them with `unte`.
 
+3. Note that unlike at the statement level, compound expressions must be parenthesized when they are embedded within other expressions.
+
 #### Examples
 
 ```
@@ -72,6 +74,15 @@ Showxa fong even(5)
   unte
   wit odd(n) deting (chu 0         detim n==0;
                          even(n-1) detim owta).
+
+Da sort(x) im fong (chu
+    merge(sort(h),sort(t)) detim x?=h:=:t;
+    x                      detim owta)
+  wit merge(xs,ys) deting (chu (chu
+        y<:merge(xs,y1) detim y<=x;
+        x<:merge(x1,ys) detim owta
+    ) detim xs?=x<:x1 && ys?=y<:y1;
+    xs:=:ys detim owta).
 ```
 
 ### Simple Expressions
