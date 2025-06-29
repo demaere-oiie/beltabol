@@ -115,7 +115,7 @@ The three built in datatypes are:
 
 All are totally ordered within themselves, but incomparable between types.
 
-All are also ordered sequences (Numbers are sequences of bits), and can be indexed with index `@` or cons'ed onto with cons `<:`. Strings and Lists are finite sequences, and hence can be concatenated with splice `:=:` or snoc'ed onto with snoc `:>`. Use these same operations with the match operator `?=` to deconstruct values instead of constructing them. (There is also a concat `++` operator, which attempts a Perl'ish DWIM approach to constructing and deconstructing values)
+All are also ordered sequences (Numbers are sequences of bits), and can be indexed with index `@` or cons'ed onto with cons `<:`. Strings and Lists are finite sequences, and hence can be concatenated with splice `:=:` or snoc'ed onto with snoc `:>`. Use these same operations with the match operator `?=` to deconstruct values instead of constructing them. (There is also a concat `++` operator, which attempts a Perl'ish DWIM approach to constructing and deconstructing values) Note that splice when used as a pattern match `h:=:t` attempts to assign `h` to a prefix and `t` to a suffix such that they are roughly the same length, which can come in handy for divide-and-conquer algorithms. 
 
 In addition, algebraic datatypes (with constructors of fixed arity) are user-creatable, and also have a total order. They are not sequences, however, so can only be constructed (or pattern matched to deconstruct) via their constructors.
 
