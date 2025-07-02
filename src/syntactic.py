@@ -326,9 +326,17 @@ class OpGT(BinOp):
     def eval(self, env):
         return self.l.eval(env).gt(self.r.eval(env))
 
+class OpGE(BinOp):
+    def eval(self, env):
+        return self.l.eval(env).ge(self.r.eval(env))
+
 class OpEQ(BinOp):
     def eval(self, env):
         return self.l.eval(env).eq(self.r.eval(env))
+
+class OpNE(BinOp):
+    def eval(self, env):
+        return self.l.eval(env).ne(self.r.eval(env))
 
 class OpCOMMA(ListSep):
     def __init__(self, l, r):

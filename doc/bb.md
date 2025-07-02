@@ -91,7 +91,7 @@ All operators are binary (with a pragmatic exception for unary negation).
 
 In rough order of decreasing binding power, the precedence is as follows:
 ```
-@ * / + - ++ `user_defined` :=: :> <: < <= == > ?= , | $ &&
+@ * / + - ++ `user_defined` :=: :> <: < <= == >= > <> ?= , | $ &&
 ```
 
 Application is denoted either implicity, by `f(x)`, or explicity, by `f $ x`.

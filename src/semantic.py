@@ -275,8 +275,8 @@ class List(PatSyntax):
         for i in range(len(self.s)):
             x = self.s[i]
             y = other.s[i]
-            if x.eq(y).v==1: return Num(0)
-        return Num(1)
+            if x.eq(y).v!=1: return Num(1)
+        return Num(0)
 
     def eval(self,env):
         return List([x.eval(env) for x in self.s])

@@ -4,7 +4,7 @@ from syntactic import Program, DaIm, DaImalowda, Showxa, Chek
 from syntactic import Chu, CDecls, CDecl
 from syntactic import Fong, FDecls, FDecl, RDecl
 from syntactic import App, OpAND, OpNDX, OpCAT, OpMUL, OpDIV
-from syntactic import OpADD, OpSUB, OpLE, OpLT, OpGT, OpEQ
+from syntactic import OpADD, OpSUB, OpLE, OpLT, OpGE, OpGT, OpEQ, OpNE
 from syntactic import OpCOMMA, OpBAR, OpMATCH, exprOpr
 from syntactic import OpSPLICE, OpCONS, OpSNOC, exprNeg
 from syntactic import exprList, exprStr, exprId, exprNil
@@ -35,7 +35,7 @@ pg = ParserGenerator(list(rsvd.values()) +
         ('left', ['BAR']),
         ('left', ['COMMA']),
         ('nonassoc', ['MATCH']),
-        ('nonassoc', ['LT', 'LE', 'EQ', 'GT']),
+        ('nonassoc', ['LT', 'LE', 'EQ', 'GT', 'GE', 'NE']),
         ('right', ['CONS']),
         ('left', ['SNOC']),
         ('left', ['SPLICE']),
@@ -101,8 +101,10 @@ Gram("""
     expr : expr SUB expr    $$ OpSUB 0 2
     expr : expr LE expr     $$ OpLE 0 2
     expr : expr LT expr     $$ OpLT 0 2
+    expr : expr GE expr     $$ OpGE 0 2
     expr : expr GT expr     $$ OpGT 0 2
     expr : expr EQ expr     $$ OpEQ 0 2
+    expr : expr NE expr     $$ OpNE 0 2
     expr : expr OPR expr    $$ exprOpr 0 1 2
 
     expr : LPN defn RPN     $$ idem 1

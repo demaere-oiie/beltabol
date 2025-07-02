@@ -16,7 +16,9 @@ oper = dict(Tab('''
     <   LT
     <=  LE
     ==  EQ
+    >=  GE
     >   GT
+    <>  NE
     :=: SPLICE
     :>  SNOC
     <:  CONS
