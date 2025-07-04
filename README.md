@@ -1,9 +1,11 @@
 # BELTABOL
 
 ----
+
 # NEW
 
 2025-07-04 some (bottom-up documentation)[doc/bottomup.md] is also available.
+
 ----
 
 Inspired by some [The Expanse](https://en.wikipedia.org/wiki/The_Expanse_(TV_series)#Language) fanfiction, BELTABOL is an [rpython](https://rpython.readthedocs.io/en/latest/)-powered eager functional [completely incomprehensible](https://www.mcmillen.dev/language_checklist.html) programming language, making it possible to write code such as:
