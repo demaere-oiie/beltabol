@@ -34,19 +34,19 @@ Lists are totally ordered in lexicographical order.
 
 ### Advanced Integers
 
-Integers have a substructure of (little-endian) sequences of bits. They can be synthesized using the `<:` cons operator, shifting bits into the least significant place: `0<:4 == 8` and `1<:4 == 5`.
+Integers have a substructure of (little-endian) sequences of bits. They can be synthesized using the `<:` cons operator, whose left hand side must be a bit (0 or 1), which is shifted into the least significant place, eg: `0<:4 == 8` and `1<:4 == 5`.
 
 Integers may also be analyzed using the `@` indexing operator, which has a higher precedence than the arithmetic operators, and picks out the bit at that place (`n@0` is the least significant bit of `n`)
 
 ### Advanced Strings
 
-Strings have a substructure of sequences of length-1 strings. They can be synthesized using the `<:` cons operator, the `>:` snoc operator, and `:=:`, the splice operator. Cons appends to the front of the list, snoc to the end, and splice joins two lists: `"b"<:"elta" == "belta"`; `"belt">:"a" == "belta"`; and `"bel":=:"ta" == "belta"`.
+Strings have a substructure of sequences of length-1 strings. They can be synthesized using the `<:` cons operator, the `>:` snoc operator, and `:=:`, the splice operator. Cons prepends a length-1 string to the front of the string, snoc appends a length-1 string to the back, and splice concatenates two strings, eg: `"b"<:"elta" == "belta"`; `"belt">:"a" == "belta"`; and `"bel":=:"ta" == "belta"`.
 
 Strings may also be analyzed using the `@` indexing operator, which picks out the length-1 string at that place. (`"foobar"@1` == "o"`)
 
 ### Advanced Lists
 
-Lists have a substructure of sequences of any beltabol datatype.  They can be synthesized using the `<:` cons operator, the `>:` snoc operator, and `:=:`, the splice operator: `0<:["won", []] == [0,"won",[]]`; `[0,"won"]:>[] == [0,"won",[]]`; and `[0]:=:["won",[]] == [0,"won",[]]`.
+Lists have a substructure of sequences of any beltabol datatype.  They can be synthesized using the `<:` cons operator, the `>:` snoc operator, and `:=:`, the splice operator, eg: `0<:["won", []] == [0,"won",[]]`; `[0,"won"]:>[] == [0,"won",[]]`; and `[0]:=:["won",[]] == [0,"won",[]]`.
 
 Lists may also be anaylzed using the `@` indexing operator, which picks out the item at that place. (`[0,"won",[]]@2 == []`)
 
