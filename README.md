@@ -2,6 +2,7 @@
 
 ----
 # NEW
+
 2025-07-04 some (bottom-up documentation)[doc/bottomup.md] is also available.
 ----
 
