@@ -118,7 +118,7 @@ Da nub(xs) im fong (chu
          []                          detim owta).
 ```
 
-In general, what in another language might be written as `let y=z in let v=w in x` would be expressed in Beltabol as `(fong x wit v deting w; wit y deting z)`.
+In general, what in another language might be written as `let y=z in let v=w in x` would be expressed in Beltabol as `(fong x wit v deting w; wit y deting z)`. Note the change in order!
 
 ### Fong/delowda for list comprehensions
 
@@ -130,10 +130,9 @@ Da flatten(xss) im fong x
     wit xs delowda xss.
 
 Du chek flatten([[0],[],[1,2]]) == [0,1,2].
-
 ```
 
-In general, what in another language might be written as `[x | y<-z, v<-w]` would be expressed in Beltabol as `(fong x wit v delowda w; wit y delowda z)`. To produce the effect of a guard, use a `delowda` clause which evaluates to either a length-0 list for failure or length-1 list for success.
+In general, what in another language might be written as `[x | y<-z, v<-w]` would be expressed in Beltabol as `(fong x wit v delowda w; wit y delowda z)`. Note the change in order! To produce the effect of a guard, use a `delowda` clause which evaluates to either a length-0 list for failure or length-1 list for success.
 
 ### Fong/unte for mutual recursion
 
@@ -149,7 +148,7 @@ Use `unte` between `wit` definitions for mutual recursion:
 
 ## Statements
 
-TBD. For the time being, see the [other docs](bb.md).
+TBD. For the time being, see the [other docs](bb.md) and the [brief introduction](https://drive.google.com/file/d/1zTGjy9KeW4cqagXHlVDwKmcZ1mEz6u-K/view).
 
 ### Da/im
 
