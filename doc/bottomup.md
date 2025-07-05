@@ -146,18 +146,69 @@ Use `unte` between `wit` definitions for mutual recursion:
                          even(n-1) detim owta)).
 ```
 
+### Fong/imalowda for local algebraic types
+
+```
+(fong dubik("",eg) == gut
+  wit eg         deting [Lit("a"),Ptr(0,5),Lit("b"),Ptr(4,6)];
+  wit gut        deting "aaaaaabaabaab";
+  wit dubik(a,c) deting (chu
+        dubik(a++v  ,              t) detim c?=Lit(v)  ++t;
+        dubik(a     ,              t) detim c?=Ptr(s,0)++t;
+        dubik(a++a@s,Ptr(s+1,n-1)++t) detim c?=Ptr(s,n)++t;
+              a                       detim owta);
+  wit Mali       imalowda Lit(v) | Ptr(s,l))
+
+```
+
 ## Statements
 
-TBD. For the time being, see the [other docs](bb.md) and the [brief introduction](https://drive.google.com/file/d/1zTGjy9KeW4cqagXHlVDwKmcZ1mEz6u-K/view).
+There are four statements:
+```
+    statement : DA expr IM defn DOT       $$ DaIm 1 3
+    statement : DA expr IMALOWDA expr DOT $$ DaImalowda 1 3
+    statement : DU CHEK expr IM expr DOT  $$ Chek 2 4 1 5
+    statement : SHOWXA defn DOT           $$ Showxa 1
+```
 
-### Da/im
+1. `Da ... im ...` binds definitions (at the top level)
+2. `Da ... imalowda ...` creates algebraic datatypes
+3. `Du chek ... im ...` is an equality test (run with `--test` option)
+4. `Showxa ...` is used for print debugging
 
-### Da/imalowda
+Limitation: Beltabol currently has no I/O; if streams are ever implemented, then probably `Mesach ...` will provide bytestream output)
 
-### Du/chek
+```
+Da four im 2+2.
+Da peano imalowda Zero | Succ(n).
+Du chek four im 4.
+Showxa Succ(Succ(Zero)).
+```
 
-### Showxa
+Note that compound expressions need not be parenthesized when occuring as `defn`s in the `Da/im` and `Showxa` statements, eg:
+
+```
+Da fak(n) im chu
+    n*fak(n-1) detim 1<=n;
+    1          detim owta.
+```
 
 ## Standard prelude
 
-TBD.
+|name|purpose|
+|----|-------|
+|owta| 1 (True)|
+|max(x,y)|**max**imum of **x** and **y**||
+|mebi(f)|returns fn returning [**f**(x)] on success and [] on failure|
+|walowda(f)|returns fn returning the least fixpoint of **f**(**f**(...**f**(x)...))|
+|sqrt(n)|integer square root of **n**||
+|mod(i,j)|i **mod** j|
+|len(v)|length of **v**alue|
+|chr(n)|length-1 string with numeric value **n**||
+|ord(c)|numeric value of length-1 string **c**|
+|unit(v)|returns empty string or list as **v** is string or list||
+|(**)(b,e)|raises int **b**ase to **e**xponent|
+
+## See also
+
+See the [other docs](bb.md) and the [brief introduction](https://drive.google.com/file/d/1zTGjy9KeW4cqagXHlVDwKmcZ1mEz6u-K/view).

@@ -178,7 +178,7 @@ class FDecl(Box):
             assert isinstance(f,Id)
             clo.e[f.i] = clo
             env[f.i] = clo
-	elif (
+	elif (  isinstance(i,PatSyntax) or
                 isinstance(i,OpNDX) or
                 isinstance(i,OpCAT) or
                 isinstance(i,OpSPLICE) or
@@ -187,6 +187,7 @@ class FDecl(Box):
             v = self.e.eval(env)
             if not i.match(v,env):
                 print("TENSHA! Refutable binding failed to match!")
+                assert False
 
 class RDecl(Box):
     def __init__(self,l,r):
