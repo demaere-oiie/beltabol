@@ -1,7 +1,7 @@
 from errors import Chek
 from semantic import Construct, Data, Lambda, Num, Str, PatSyntax
 from semantic import Seq, Nil, Id, fresh, getlist, newBrand, List, Clo
-from semantic import ListSep, Agg, Box, Env
+from semantic import ListSep, Agg, Box, Env, Set, Null, getset, Pair, Bogus
 
 class Program(Box):
     def __init__(self,s,p=None):
@@ -27,8 +27,10 @@ class DaIm(Box):
         elif isinstance(e, App):
             f = e.f
             assert isinstance(f,Id)
-            clo = Lambda(e.x, self.d).eval(env)
-            clo.e[f.i] = clo
+            clo = Lambda(e.x, self.d, f.i).eval(env)
+            g = clo.s[0]
+            assert isinstance(g,Clo)
+            g.e[f.i] = clo
             env[f.i] = clo
 
 def getalts(o):
@@ -56,7 +58,9 @@ class Showxa(Box):
 
     def eval(self,env):
         assert isinstance(self.e,Box)
-        print("SHOWXA %s" % self.e.eval(env).__str__())
+        v = self.e.eval(env)
+        if v is None: print("SHOWXA Null")
+        else:         print("SHOWXA %s" % v.__str__())
 
 class Chu(Box):
     def __init__(self,c):
@@ -80,6 +84,7 @@ class Fong(Box):
         assert isinstance(self.e,Box)
         f = self.f
         assert isinstance(f,FDecls)
+        assert isinstance(self.f,Box)
         env1 = fresh(env)
         if not f.lctx:
             f.eval(env1)
@@ -160,7 +165,6 @@ class FDecls(Box):
             rv.extend(self.l.reval(nenv))
         return rv
 
-
 class FDecl(Box):
     def __init__(self,i,e,lctx=None):
         self.i = i
@@ -169,16 +173,17 @@ class FDecl(Box):
 
     def eval(self,env):
         i = self.i
-
         if isinstance(i, Id):
             env[i.i] = self.e.eval(env)
         elif isinstance(i, App):
-            clo = Lambda(i.x, self.e).eval(env)
             f = i.f
             assert isinstance(f,Id)
-            clo.e[f.i] = clo
+            clo = Lambda(i.x, self.e, f.i).eval(env)
+            g = clo.s[0]
+            assert isinstance(g,Clo)
+            g.e[f.i] = clo
             env[f.i] = clo
-	elif (  isinstance(i,PatSyntax) or
+        elif (  isinstance(i,PatSyntax) or
                 isinstance(i,OpNDX) or
                 isinstance(i,OpCAT) or
                 isinstance(i,OpSPLICE) or
@@ -204,10 +209,12 @@ class RDecl(Box):
         assert isinstance(id,Id)
         self.l.eval(env)
         clo = env[id.i]
-        assert isinstance(clo,Clo)
+        assert isinstance(clo,Set)
+        c2 = clo.s[0]
+        assert isinstance(c2,Clo)
         if self.r is not None:
             self.r.eval(env)
-        clo.e = fresh(env)
+        c2.e = fresh(env)
 
 class App(PatSyntax):
     def __init__(self,f,x=Nil()):
@@ -216,29 +223,26 @@ class App(PatSyntax):
 
     def eval(self,env):
         s = self.x.eval(env)
-        return (self.f.eval(env)).apply(s,env)
+        f = self.f.eval(env)
+        t = f.apply(s,env)
+        return t if t is not None else Bogus()
 
     def match(self,v,env):
+        if v is None: return False
         q = self.f.eval(env)
-        if isinstance(q,Construct):
-            assert isinstance(v,Data)
-            if v.b!=q.b: return False
-            subs = getlist(self.x)
-            if len(subs)!=q.a: return False
-            #for w,s in zp(v.v,subs):
-            #    print("%s?=%s %s" % (w,s,match(w,s,env)))
-            for i in range(len(v.v)):
-                w = v.v[i]
-                s = subs[i]
-                if not s.match(w,env):
-                    return False
-            return True
-        elif isinstance(q,Clo):
-            b = q.apply(v,env)
-            if not isinstance(b,Num) or b.v!=1:
+        assert isinstance(q,Construct)
+        assert isinstance(v,Data)
+        if v.b!=q.b: return False
+        subs = getlist(self.x)
+        if len(subs)!=q.a: return False
+        #for w,s in zp(v.v,subs):
+        #    print("%s?=%s %s" % (w,s,match(w,s,env)))
+        for i in range(len(v.v)):
+            w = v.v[i]
+            s = subs[i]
+            if not s.match(w,env):
                 return False
-            return self.x.match(v,env)
-        return False
+        return True
 
     def __str__(self):
         return "%s(%s)" % (self.f,self.x)
@@ -248,11 +252,32 @@ class BinOp(Box):
         self.l = l
         self.r = r
 
+class OpCOL(BinOp):
+    def eval(self,env):
+        ll = self.l.eval(env)
+        rr = self.r.eval(env)
+        return Pair(ll,rr)
+
+    def match(self,v,env):
+        if not isinstance(v,Pair): return False
+        if not self.l.match(v.l,env): return False
+        if not self.r.match(v.r,env): return False
+        return True
+
 class OpAND(BinOp):
     def eval(self, env):
         ll = self.l.eval(env)
+        if isinstance(ll,Set):
+            rr = self.r.eval(env)
+            if isinstance(rr,Set):
+                t = []
+                t.extend(ll.s)
+                t.extend(rr.s)
+                return Set(t)
+        assert isinstance(ll,Num)
+        if ll.v == 0: return ll
         rr = self.r.eval(env)
-        return ll.mul(rr)
+        return rr
 
 class OpNDX(BinOp):
     def eval(self, env):
@@ -290,6 +315,10 @@ class OpCAT(BinOp):
             if len(v.s)==0: return False
             return (self.l.match(Str(v.s[0]),env) and
                     self.r.match(Str(v.s[1:]),env))
+        elif isinstance(v,Set):
+            if len(v.s)==0: return False
+            return (self.l.match(Set(v.s[:1]),env) and
+                    self.r.match(Set(v.s[1:]),env))
         elif isinstance(v,List):
             if len(v.s)==0: return False
             l = self.l
@@ -375,7 +404,8 @@ class OpMATCH(BinOp):
                 isinstance(r,OpCAT) or
                 isinstance(r,OpSPLICE) or
                 isinstance(r,OpCONS) or
-                isinstance(r,OpSNOC))
+                isinstance(r,OpSNOC) or
+                isinstance(r,OpCOL))
         b = r.match(v,env)
         return Num(int(b))
 
@@ -386,6 +416,8 @@ class OpSPLICE(BinOp):
             return Str(l.s + r.s)
         elif isinstance(l,List) and isinstance(r,List):
             return List(l.s + r.s)
+        elif isinstance(l,Set) and isinstance(r,Set):
+            return Set(l.s + r.s).canon()
         return None
 
     def match(self, v, env):
@@ -397,6 +429,10 @@ class OpSPLICE(BinOp):
             m = len(v.s)//2
             return (self.l.match(List(v.s[:m]),env) and
                     self.r.match(List(v.s[m:]),env))
+        elif isinstance(v,Set) and len(v.s)>1:
+            m = len(v.s)//2
+            return (self.l.match(Set(v.s[:m]),env) and
+                    self.r.match(Set(v.s[m:]),env))
         return False
 
 class OpCONS(BinOp):
@@ -404,6 +440,8 @@ class OpCONS(BinOp):
         l,r = self.l.eval(env), self.r.eval(env)
         if isinstance(r,List):
             return List([l] + r.s)
+        elif isinstance(r,Set):
+            return Set([l] + r.s).canon()
         elif isinstance(l,Str) and isinstance(r,Str):
             return Str(l.s + r.s)
         elif isinstance(l,Num) and isinstance(r,Num):
@@ -412,10 +450,13 @@ class OpCONS(BinOp):
         return None
 
     def match(self, v, env):
-        if isinstance(v,List) and len(v.s)>1:
+        if isinstance(v,List) and len(v.s)>0:
             return (self.l.match(v.s[0],env) and
                     self.r.match(List(v.s[1:]),env))
-        elif isinstance(v,Str) and len(v.s)>1:
+        elif isinstance(v,Set) and len(v.s)>0:
+            return (self.l.match(v.s[0],env) and
+                    self.r.match(Set(v.s[1:]),env))
+        elif isinstance(v,Str) and len(v.s)>0:
             return (self.l.match(Str(v.s[0]),env) and
                     self.r.match(Str(v.s[1:]),env))
         elif isinstance(v,Num) and v.v>0:
@@ -428,14 +469,19 @@ class OpSNOC(BinOp):
         l,r = self.l.eval(env), self.r.eval(env)
         if isinstance(l,List):
             return List(l.s + [r])
+        elif isinstance(l,Set):
+            return Set(l.s + [r]).canon()
         elif isinstance(l,Str) and isinstance(r,Str):
             return Str(l.s + r.s)
         return None
     def match(self, v, env):
-        if isinstance(v,List) and len(v.s)>1:
+        if isinstance(v,List) and len(v.s)>0:
             return (self.l.match(List(v.s[:-1]),env) and
                     self.r.match(v.s[-1],env))
-        elif isinstance(v,Str) and len(v.s)>1:
+        elif isinstance(v,Set) and len(v.s)>0:
+            return (self.r.match(v.s[0],env) and
+                    self.l.match(Set(v.s[1:]),env))
+        elif isinstance(v,Str) and len(v.s)>0:
             return (self.l.match(Str(v.s[:-1]),env) and
                     self.r.match(Str(v.s[-1]),env))
         return False
@@ -449,13 +495,16 @@ def exprOpr(l,o,r):
     s = o.getstr()
     if s[0]=='`': f = Id(mid(s))
     else:         f = Id("(%s)" % (s,))
-    return App(f,Seq(l,r))
+    return App(f,OpCOMMA(l,r))
 
 def exprNeg(p):
     return OpSUB(Num(0),p)
 
 def exprList(p):
     return List(getlist(p))
+
+def exprSet(p):
+    return Set(getset(p))
 
 def exprStr(p):
     return Str(mid(p.getstr()))
@@ -467,3 +516,6 @@ def exprId(p):
 
 def exprNil():
     return List([])
+
+def exprNull():
+    return Set([])

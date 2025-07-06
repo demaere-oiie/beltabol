@@ -3,8 +3,29 @@ from rply.token import BaseBox
 class Box(BaseBox):
     _attrs_ = []
 
+    def le(self,other):
+        if isinstance(self,Balk): return Num(1)
+        if isinstance(other,Bogus): return Num(1)
+        return self.xle(other)
+
+    def ge(self,other):
+        return other.le(self)
+
+    def lt(self,other):
+        return Num(int(self.le(other).v>other.le(self).v))
+
+    def gt(self,other):
+        return other.lt(self)
+
+    def eq(self,other):
+        return self.le(other).mul(other.le(self))
+
+    def ne(self,other):
+        if not isinstance(self, type(other)): return Num(0)
+	return Num(1-self.eq(other).v)
+
 class PatSyntax(Box):
-    def match(self,v,env): 
+    def match(self,v,env):
         return False
 
 class Nil(PatSyntax):
@@ -17,11 +38,21 @@ class Nil(PatSyntax):
     def apply(self,other,env):
         return other
 
-    def match(self,other,env):
-        return isinstance(other,Nil)
+    def match(self,v,env):
+        return isinstance(v,Nil)
 
-    def eq(self,other):
-        return Num(1 if isinstance(other,Nil) else 0)
+class Null(PatSyntax):
+    def __init__(self):
+        pass
+
+    def eval(self,env):
+        return self
+
+    def apply(self,other,env):
+        return self
+
+    def match(self,v,env):
+        return isinstance(v,Null)
 
 class ListSep(Box):
     pass
@@ -50,26 +81,64 @@ class Seq(ListSep):
                 return False
         return True
 
-    def eq(self,other):
-        x = getlist(self)
-        y = getlist(other)
-        if len(x) != len(y): return Num(0)
-        for i in range(len(x)):
-            if x[i].eq(y[i]).v==0:
-                return Num(0)
-        return Num(1)
+    def xle(self,other):
+        if not isinstance(other,Seq): return Num(0)
+        if self.l.lt(other.l).v == 1: return Num(1)
+        if self.l.le(other.l).v == 0: return Num(0)
+        if self.r.le(other.r).v == 1: return Num(1)
+        return Num(0)
 
     def __str__(self):
-        return "%s,%s" % (self.l,self.r)
+        return "%s,%s" % (self.l.__str__(),self.r.__str__())
 
 class Agg(Box):
     def __init__(self,l,r):
         self.l = l
         self.r = r
 
+class Pair(PatSyntax):
+    def __init__(self,l,r):
+        self.l = l
+        self.r = r
+
+    def eval(self,env):
+        return self
+
+    def apply(self,other,env):
+        return Bogus()
+
+    def xle(self,other):
+        if not isinstance(other,Pair): return Num(0)
+        if other.l.lt(self.l).v == 1: return Num(1)
+        if self.l.eq(other.l).v == 0: return Num(0)
+        if self.r.le(other.r).v == 1: return Num(1)
+        return Num(0)
+
+    def __str__(self):
+        return "%s: %s" % (self.l.__str__(), self.r.__str__())
+
+class Bogus(Box):
+    def __str__(self):
+       return "Bogus"
+
+    def xle(self,other):
+        return Num(0)
+
+class Balk(Box):
+    def __str__(self):
+        return "Balk"
+
+    def xle(self,other):
+        return Num(1)
+
 def getlist(o):
     if isinstance(o,ListSep): return getlist(o.l)+getlist(o.r)
     if isinstance(o,Nil):   return []
+    else: return [o]
+
+def getset(o):
+    if isinstance(o,ListSep): return getset(o.l)+getset(o.r)
+    if isinstance(o,Null):   return []
     else: return [o]
 
 def commasep(xs):
@@ -83,7 +152,10 @@ class Data(Box):
         self.b = b
         self.v = v
 
-    def le(self,other):
+    def eval(self,env):
+        return self
+
+    def xle(self,other):
         if not isinstance(other,Data): return Num(0)
         if self.b > other.b: return Num(0)
         if self.b < other.b: return Num(1)
@@ -93,68 +165,11 @@ class Data(Box):
             if x.lt(y).v==1: return Num(1)
             if x.gt(y).v==1: return Num(0)
         return Num(1)
-
-    def lt(self,other):
-        if not isinstance(other,Data): return Num(0)
-        if self.b > other.b: return Num(0)
-        if self.b < other.b: return Num(1)
-        for i in range(len(self.v)):
-            x = self.v[i]
-            y = other.v[i]
-            if x.lt(y).v==1: return Num(1)
-            if x.gt(y).v==1: return Num(0)
-        return Num(0)
-
-    def ge(self,other):
-        if not isinstance(other,Data): return Num(0)
-        if self.b > other.b: return Num(1)
-        if self.b < other.b: return Num(0)
-        for i in range(len(self.v)):
-            x = self.v[i]
-            y = other.v[i]
-            if x.lt(y).v==1: return Num(0)
-            if x.gt(y).v==1: return Num(1)
-        return Num(1)
-
-    def gt(self,other):
-        if not isinstance(other,Data): return Num(0)
-        if self.b > other.b: return Num(1)
-        if self.b < other.b: return Num(0)
-        for i in range(len(self.v)):
-            x = self.v[i]
-            y = other.v[i]
-            if x.lt(y).v==1: return Num(0)
-            if x.gt(y).v==1: return Num(1)
-        return Num(0)
-
-    def eq(self,other):
-        if not isinstance(other,Data): return Num(0)
-        if self.b != other.b: return Num(0)
-        for i in range(len(self.v)):
-            x = self.v[i]
-            y = other.v[i]
-            b = x.eq(y)
-            assert isinstance(b,Num)
-            if b.v==0:
-                return Num(0)
-        return Num(1)
-
-    def ne(self,other):
-        if not isinstance(other,Data): return Num(0)
-        if self.b != other.b: return Num(1)
-        for i in range(len(self.v)):
-            x = self.v[i]
-            y = other.v[i]
-            b = x.eq(y)
-            assert isinstance(b,Num)
-            if b.v==0:
-                return Num(1)
-        return Num(0)
 
     def __str__(self):
         if len(self.v)==0: return brands.d[self.b]
         return "%s(%s)" % (brands.d[self.b],commasep(self.v))
-         
+
 
 class Construct(Box):
     def __init__(self,b,a):
@@ -175,23 +190,120 @@ class Construct(Box):
         return "{%s/%d}" % (brands.d[self.b],self.a)
 
 class Clo(Box):
-    def __init__(self,c,e):
+    def __init__(self,c,e,n):
         self.c = c
         self.e = e
+        self.n = n
+
+    def xle(self,other):
+        if not isinstance(other,Clo): return Num(0)
+        return self.c.eq(other.c).mul(self.e.eq(other.e))
 
     def apply(self,other,env):
+        return Bogus()
+
+    def xpply(self,other,env):
         frm = self.c.a
         env = fresh(self.e)
+        #print("%s(%s)" % (self.n,other.__str__()))
         if frm.match(other,env): return self.c.e.eval(env)
         else:                    return None
 
+    def __str__(self):
+        return "{Clo:%s}" % (self.n,)
+
 class Lambda(Box):
-    def __init__(self,a,e):
+    def __init__(self,a,e,n):
         self.a = a
         self.e = e
+        self.b = newBrand("(lambda)")
+        self.n = n
+
+    def xle(self,other):
+        if not isinstance(other,Lambda): return Num(0)
+        if self.b==other.b: return Num(1)
+        return Num(0)
 
     def eval(self,env):
-        return Clo(self,fresh(env))
+        return Set([Clo(self,fresh(env),self.n)])
+
+class Set(PatSyntax):
+    def __init__(self,s):
+        self.s = s
+
+    def canon(self):
+        return self.eval(Env(None))
+
+    def rcat(self,other):
+        if isinstance(other,Set):
+            return Set(other.s+self.s).eval(Env(None))
+        else:
+            return Set([other]+self.s).eval(Env(None))
+
+    def eval(self,env):
+        t = []
+        for x in self.s:
+            y = x.eval(env)
+            f = True
+            if isinstance(y,Pair) and isinstance(y.r,Balk):
+                for z in t:
+                    if isinstance(z,Pair) and y.l.eq(z.l).v: f = False
+            else:
+                for z in t:
+                    if y.eq(z).v: f = False
+            if f: t = t+[y]
+        return Set(t)
+
+    def ndx(self,other):
+        for x in self.s:
+            if isinstance(x,Pair) and x.l.eq(other).v==1:
+                return x.r
+        return Bogus()
+
+    def xle(self,other):
+        if not isinstance(other,Set): return Num(0)
+        for t in self.s:
+          b = False
+          for u in other.s:
+            if t.eq(u).v: b = True
+          if b == False:
+            return Num(0)
+        return Num(1)
+
+    def match(self,v,env):
+        if isinstance(v,Set) and len(v.s)==1 and len(self.s)==1:
+            return self.s[0].match(v.s[0],env)
+        return self.eq(v).v == 1
+
+    def apply(self,other,env):
+        def isect(x,y):
+            if x is None: return y
+            if y is None: return x
+            if x==y: return x
+            if isinstance(x,Num) and isinstance(y,Num):
+                if x.le(y).v == 1: return x
+                else:              return y
+            return None
+        t = None
+        for x in self.s:
+            if isinstance(x,Pair):
+                print "Pair"
+                if x.l.eq(other).v==1:
+                    print "Match"
+                    u = x.r
+                    t = isect(t,u)
+            elif isinstance(x,Clo):
+                u = x.xpply(other,env)
+                t = isect(t,u)
+            else:
+                print x
+                return Bogus()
+        if t is None: t=Bogus()
+        return t
+
+
+    def __str__(self):
+        return "{%s}" % (",".join([x.__str__() for x in self.s]),)
 
 class List(PatSyntax):
     def __init__(self,s):
@@ -217,7 +329,7 @@ class List(PatSyntax):
         assert isinstance(other,Num)
         return self.s[other.v]
 
-    def le(self,other):
+    def xle(self,other):
         if not isinstance(other,List): return Num(0)
         for i in range(len(self.s)):
             x = self.s[i]
@@ -227,62 +339,11 @@ class List(PatSyntax):
             if x.gt(y).v==1: return Num(0)
         return Num(1)
 
-    def lt(self,other):
-        if not isinstance(other,List): return Num(0)
-        if len(self.s)==0:
-            if len(other.s)==0: return Num(0)
-            return Num(1)
-        for i in range(len(self.s)):
-            x = self.s[i]
-            if i>=len(other.s): return Num(0)
-            y = other.s[i]
-            if x.lt(y).v==1: return Num(1)
-            if x.gt(y).v==0: return Num(0)
-        return Num(0)
-
-    def ge(self,other):
-        if not isinstance(other,List): return Num(0)
-        for i in range(len(self.s)):
-            x = self.s[i]
-            if i>=len(other.s): return Num(1)
-            y = other.s[i]
-            if x.gt(y).v==1: return Num(1)
-            if x.lt(y).v==1: return Num(0)
-        return Num(1)
-
-    def gt(self,other):
-        if not isinstance(other,List): return Num(0)
-        for i in range(len(self.s)):
-            x = self.s[i]
-            if i>=len(other.s): return Num(1)
-            y = other.s[i]
-            if x.gt(y).v==1: return Num(1)
-            if x.lt(y).v==1: return Num(0)
-        return Num(0)
-
-    def eq(self,other):
-        if not isinstance(other,List): return Num(0)
-        if len(self.s) != len(other.s): return Num(0)
-        for i in range(len(self.s)):
-            x = self.s[i]
-            y = other.s[i]
-            if x.eq(y).v==0: return Num(0)
-        return Num(1)
-
-    def ne(self,other):
-        if not isinstance(other,List): return Num(0)
-        if len(self.s) != len(other.s): return Num(1)
-        for i in range(len(self.s)):
-            x = self.s[i]
-            y = other.s[i]
-            if x.eq(y).v!=1: return Num(1)
-        return Num(0)
-
     def eval(self,env):
         return List([x.eval(env) for x in self.s])
 
     def __str__(self):
-        return "List(%s)" % ([x.__str__() for x in self.s],)
+        return "%s" % ([x.__str__() for x in self.s],)
 
 class Str(PatSyntax):
     def __init__(self,s):
@@ -296,29 +357,9 @@ class Str(PatSyntax):
         assert isinstance(other,Num)
         return Str(self.s[other.v])
 
-    def le(self,other):
+    def xle(self,other):
         if not isinstance(other,Str): return Num(0)
         return Num(1) if self.s<=other.s else Num(0)
-
-    def lt(self,other):
-        if not isinstance(other,Str): return Num(0)
-        return Num(1) if self.s<other.s else Num(0)
-
-    def ge(self,other):
-        if not isinstance(other,Str): return Num(0)
-        return Num(1) if self.s>=other.s else Num(0)
-
-    def gt(self,other):
-        if not isinstance(other,Str): return Num(0)
-        return Num(1) if self.s>other.s else Num(0)
-
-    def eq(self,other):
-        if not isinstance(other,Str): return Num(0)
-        return Num(1) if self.s==other.s else Num(0)
-
-    def ne(self,other):
-        if not isinstance(other,Str): return Num(0)
-        return Num(1) if self.s!=other.s else Num(0)
 
     def eval(self,env):
         return self
@@ -327,7 +368,7 @@ class Str(PatSyntax):
         return isinstance(v,Str) and self.s==v.s
 
     def __str__(self):
-        return "Str(%s)" % (self.s,)
+        return "\"%s\"" % (self.s,)
 
 class Num(PatSyntax):
     def __init__(self,v):
@@ -365,34 +406,15 @@ class Num(PatSyntax):
         assert isinstance(other,Num)
         return Num(self.v + other.v)
 
-    def le(self,other):
+    def xle(self,other):
         if not isinstance(other,Num): return Num(0)
         return Num(1) if self.v<=other.v else Num(0)
-
-    def lt(self,other):
-        if not isinstance(other,Num): return Num(0)
-        return Num(1) if self.v<other.v else Num(0)
-
-    def ge(self,other):
-        if not isinstance(other,Num): return Num(0)
-        return Num(1) if self.v>=other.v else Num(0)
-    def gt(self,other):
-        if not isinstance(other,Num): return Num(0)
-        return Num(1) if self.v>other.v else Num(0)
-
-    def eq(self,other):
-        if not isinstance(other,Num): return Num(0)
-        return Num(1) if self.v==other.v else Num(0)
-
-    def ne(self,other):
-        if not isinstance(other,Num): return Num(0)
-        return Num(1) if self.v!=other.v else Num(0)
 
     def __eq__(self, other):
         return isinstance(other,Num) and self.v == other.v
 
     def __str__(self):
-        return "Num(%d)" % (self.v,)
+        return "%d" % (self.v,)
 
 class Id(PatSyntax):
     def __init__(self,i):
@@ -400,7 +422,10 @@ class Id(PatSyntax):
         assert isinstance(self.i,str)
 
     def eval(self,env):
-        return env.get(self.i,None)
+        r = env.get(self.i,None)
+        if r is None:
+            print("NULL %s" % (self.i,))
+        return r
 
     def match(self,v,env):
         if self.i == "_": return True
@@ -411,7 +436,7 @@ class Id(PatSyntax):
         else:
             env[self.i] = v
             return True
-    
+
     def __str__(self):
         return "Id(%s)" % (self.i,)
 
@@ -429,6 +454,12 @@ class Env(object):
 
     def reset(self):
         self.d.clear()
+
+    def eq(self,other):
+        if len(self.d)!= len(other.d): return Num(0)
+        for k,v in self.d.items():
+            if other.d[k] != v: return Num(0)
+        return Num(1)
 
     def __getitem__(self, key):
         return self.d[key]
@@ -450,7 +481,7 @@ class Brands:
         return self.i
 
 brands = Brands(2000)
-    
+
 def newBrand(s):
     return brands.next(s)
 

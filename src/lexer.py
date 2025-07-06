@@ -29,6 +29,7 @@ oper = dict(Tab('''
     &&  AND
     ;   SEMIC
     .   DOT
+    :   COL
 '''))
 
 lg = LexerGenerator()
@@ -43,6 +44,8 @@ for typ,pat in Tab(r'''
     RPN \)
     LBR \[
     RBR \]
+    LBC \{
+    RBC \}
     OPR [!?$&+*-/,:;<=>|@#%^]+
     NAM [_\w]+
 '''):

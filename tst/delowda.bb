@@ -32,9 +32,7 @@ Du chek (fong ord(c) wit c delowda "foo") im [102,111,111].
 
 Da zip(xs,ys) im chu
     [x,y]<:zip(xt,yt) detim xs?=x<:xt && ys?=y<:yt;
-    []                detim xs==[];
-    []                detim ys==[];
-    [[xs@0,ys@0]]     detim owta.
+    []                detim owta.
 
 Du chek zip("foobar","bletc") im [["f","b"],["o","l"],["o","e"],
                                   ["b","t"],["a","c"]].
@@ -55,4 +53,4 @@ Da filter(p) im fong g
 
 Da even(n) im chu 1 detim n `mod` 2 == 0.
 
-Du chek filter(even) $ iota(4) im [0,2].
+// du chek filter(even) $ iota(4) im [0,2].

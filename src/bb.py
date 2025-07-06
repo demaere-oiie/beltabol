@@ -1,6 +1,6 @@
 from errors import disperr, ParsingError
 from parser import cooked, engmap, idem, genAST
-from semantic import Env, Num, Str
+from semantic import Env, Num, Str, Balk, Bogus
 import os
 
 def Eval(src,map,env):
@@ -13,6 +13,7 @@ def Eval(src,map,env):
 
 prenv = Env(None)
 prenv["_ByteTable_"] = Str("".join(chr(n) for n in range(256)))
+prenv["Bogus"] = Bogus()
 Eval(os.read(os.open("src/prelude.bb",os.O_RDONLY),2**16),idem,prenv)
 
 usage = lambda n: """
@@ -60,6 +61,7 @@ def main(argv):
             print("%s %s" % (t.gettokentype(), t.getstr()))
     env["\0source\0"] = Str(s)
     env["Du chek"] = Num(int("--test" in argv))
+    env["Balk"] = Balk()
     return Eval(s,m,env)
 
 target = lambda *args: main

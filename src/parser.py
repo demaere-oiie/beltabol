@@ -7,7 +7,8 @@ from syntactic import App, OpAND, OpNDX, OpCAT, OpMUL, OpDIV
 from syntactic import OpADD, OpSUB, OpLE, OpLT, OpGE, OpGT, OpEQ, OpNE
 from syntactic import OpCOMMA, OpBAR, OpMATCH, exprOpr
 from syntactic import OpSPLICE, OpCONS, OpSNOC, exprNeg
-from syntactic import exprList, exprStr, exprId, exprNil
+from syntactic import exprList, exprSet, exprStr, exprId
+from syntactic import exprNil, exprNull, OpCOL
 
 ################################################################################
 def gram(s):
@@ -26,7 +27,7 @@ idem = lambda p: p
 
 pg = ParserGenerator(list(rsvd.values()) +
                      list(oper.values()) +
-                     "OPR NAM LPN RPN LBR RBR STR".split(),
+                     "OPR NAM LPN RPN LBR RBR LBC RBC STR".split(),
     precedence=[
         ('left', ['SEMIC']),
         ('left', ['UNTE']),
@@ -34,6 +35,7 @@ pg = ParserGenerator(list(rsvd.values()) +
         ('right', ['DOLLAR']),
         ('left', ['BAR']),
         ('left', ['COMMA']),
+        ('right', ['COL']),
         ('nonassoc', ['MATCH']),
         ('nonassoc', ['LT', 'LE', 'EQ', 'GT', 'GE', 'NE']),
         ('right', ['CONS']),
@@ -86,6 +88,7 @@ Gram("""
     expr : expr LPN RPN      $$ App 0
     expr : expr DOLLAR expr  $$ App 0 2
 
+    expr : expr COL expr    $$ OpCOL 0 2
     expr : expr SPLICE expr $$ OpSPLICE 0 2
     expr : expr CONS expr   $$ OpCONS 0 2
     expr : expr SNOC expr   $$ OpSNOC 0 2
@@ -114,6 +117,8 @@ Gram("""
 
     expr : LBR expr RBR    $$ exprList 1
     expr : LBR RBR         $$ exprNil
+    expr : LBC expr RBC    $$ exprSet 1
+    expr : LBC RBC         $$ exprNull
     expr : STR             $$ exprStr 0
     expr : NAM             $$ exprId 0
 """)
