@@ -2,7 +2,7 @@
 
 ## Lexical structure
 
-In principle, sequences of punctuation form operators, and alphanumerics literals and identifiers. Parens, square brackets, and string quotations group as usual; curly brackets are expected to become significant whenever unordered collections are added to the language.
+In principle, sequences of punctuation form operators, and alphanumerics literals and identifiers. Parens, square brackets, curly brackets, and string quotations group as usual.
 
 Comments are `//` to end-of-line. (Limitation: currently '#!' at the beginning of a line is also treated as a comment wherever it occurs in an input file. This will probably stop being true whenever "BELTABOL WIT WOWT" (literate Beltabol) is implemented...)
 
@@ -125,9 +125,7 @@ Limitation: in principle, the integers are supposed to be arbitrary-precision (h
 
 Limitation: there is no escaping convention currently for string literals, but `chr` and `ord` have been provided so in general arbitrary string values may be created.
 
-Limitation: neither `>=` nor `<>` have yet made it to the front end.
-
-Future work: unordered datatypes, indexing by values other than numbers, disjunction `|` of closures.
+Future work: disjunction `|` of closures, streams
 
 ### Examples
 
@@ -141,4 +139,4 @@ Du chek [0,1]:=:[2,3] im [0,1,2,3].
 ... len(h)+len(t) detim s?=h:=:t; ...
 ```
 
-See also the `tst` subdirectory,
+See also the `tst` subdirectory and the [bottom-up documentation](bottomup.md).

@@ -4,6 +4,7 @@
 
 # NEW
 
+2025-07-06 rough draft of unordered collections: sets and maps (dictionaries).
 2025-07-04 some [bottom-up documentation](doc/bottomup.md) is also available.
 
 ----
