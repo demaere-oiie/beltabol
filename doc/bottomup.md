@@ -91,7 +91,15 @@ There are two compound expressions, `chu` compounds and `fong` compounds.
     defn : FONG expr {rdecls SEMIC} rdecls
 ```
 
-When compound expressions occur as subexpressions of simple expressions, they must be fully parenthesized, eg: `2*(chu 2 detim p; 0 detim owta)`
+When compound expressions occur as subexpressions anywhere but in top-level statements, they must be fully parenthesized, eg: `2*(chu 2 detim p; 0 detim owta)`
+
+```
+Da div(n,m) im chu
+    (fong (chu [q#1, r-m] detim m<=r;
+               [q#0, r  ] detim owta)
+        wit [q,r] deting div(n,m#0)) detim m<=n;
+               [  0, n  ]            detim owta.
+```
 
 ### Chu
 
