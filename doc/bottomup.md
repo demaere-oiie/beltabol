@@ -6,6 +6,8 @@ This file is a bottom-up introduction to Beltabol, a novel eager functional lang
 
 Beltabol currently has three built-in datatypes: integers, strings, and lists. All are totally ordered, and can either being treated in a basic fashion, operating upon each value as a whole, or (in an advanced fashion) can be further analyzed into parts: integers into bits, strings into strings of length 1, and lists into any datatype.
 
+Limitation: Beltabol does not have a tuple type, but as there is no type checking, lists can be used instead.
+
 ### Basics of Integers
 
 Beltabol integers, like `0` or `42`, have the usual arithmetic operations with the usual precedence: `+`, `-`, `*`, and `/`. The last is integer division, so `5/2 == 2`.
@@ -134,6 +136,8 @@ Du chek flatten([[0],[],[1,2]]) == [0,1,2].
 
 In general, what in another language might be written as `[x | y<-z, v<-w]` would be expressed in Beltabol as `(fong x wit v delowda w; wit y delowda z)`. Note the change in order! To produce the effect of a guard, use a `delowda` clause which evaluates to either a length-0 list for failure or length-1 list for success.
 
+Note that one can mix `deting` and `delowda` clauses within a single `fong`; the delowdas will act to multiply results but the detings always introduce a single binding (per the delowda's underneath them) only.
+
 ### Fong/unte for mutual recursion
 
 Use `unte` between `wit` definitions for mutual recursion:
@@ -192,6 +196,10 @@ Da fak(n) im chu
     n*fak(n-1) detim 1<=n;
     1          detim owta.
 ```
+
+## Comments
+
+Line comments go from an opening `//` to the end of line.
 
 ## Standard prelude
 
