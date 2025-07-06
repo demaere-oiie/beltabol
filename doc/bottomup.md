@@ -4,7 +4,7 @@ This file is a bottom-up introduction to Beltabol, a novel eager functional lang
 
 ## Built-in Datatypes and simple Expressions
 
-Beltabol currently has three built-in datatypes: integers, strings, and lists. All are totally ordered, and can either being treated in a basic fashion, operating upon each value as a whole, or (in an advanced fashion) can be further analyzed into parts: integers into bits, strings into strings of length 1, and lists into any datatype.
+Beltabol currently has four built-in datatypes: integers, strings, lists, and sets. All can be treated in a basic fashion, operating upon each value as a whole, or (in an advanced fashion) can be further analyzed into parts: integers into bits, strings into strings of length 1, and lists and sets into any datatype.
 
 Limitation: Beltabol does not have a tuple type, but as there is no type checking, lists can be used instead.
 
@@ -30,9 +30,17 @@ Limitation: currently there are no string escapes.
 
 ### Basics of Lists
 
-Beltabol lists, like `[]` or `[0, "won", []]`, are sequences of items of any beltabol type. They can also be concatenated with `++`, and as a special case, `item++list` acts as a cons. The empty list is `[]` and is the identity for `++`.
+Beltabol lists, like `[]` or `[0, "wang", []]`, are sequences of items of any beltabol type, including other lists. They can also be concatenated with `++`, and as a special case, `item++list` acts as a cons. The empty list is `[]` and is the identity for `++`.
 
 Lists are totally ordered in lexicographical order.
+
+### Basics of Sets
+
+Beltabol sets, like `{}` or `{0, "nada", [], {}}` are unordered collections of elements of any beltabol type, including other sets. They can be unioned with `++`, and as a special case, `element++set` includes the element in the set. The empty set is `{}` and is the identity for `++`.
+
+A special kind of set is the map, which has key:value pairs as elements, eg `{"nada":0,"wang":1,"tu":2}`. These act like functions, and when called with an existing key as an argument, return the corresponding value.
+
+Sets are partially ordered in inclusion order.
 
 ### Advanced Integers
 
@@ -48,9 +56,15 @@ Strings may also be analyzed using the `@` indexing operator, which picks out th
 
 ### Advanced Lists
 
-Lists have a substructure of sequences of any beltabol datatype.  They can be synthesized using the `<:` cons operator, the `>:` snoc operator, and `:=:`, the splice operator, eg: `0<:["won", []] == [0,"won",[]]`; `[0,"won"]:>[] == [0,"won",[]]`; and `[0]:=:["won",[]] == [0,"won",[]]`.
+Lists have a substructure of sequences of items, of any beltabol datatype.  They can be synthesized using the `<:` cons operator, the `>:` snoc operator, and `:=:`, the splice operator, eg: `0<:["wang", []] == [0,"wang",[]]`; `[0,"wang"]:>[] == [0,"wang",[]]`; and `[0]:=:["wang",[]] == [0,"wang",[]]`.
 
-Lists may also be anaylzed using the `@` indexing operator, which picks out the item at that place. (`[0,"won",[]]@2 == []`)
+Lists may also be analyzed using the `@` indexing operator, which picks out the item at that place. (`[0,"wang",[]]@2 == []`)
+
+### Advanced Sets
+
+Sets have a substructure of unordered collections of elements, of any beltabol datatype. They can be synthesized using the `<:` cons operator and `:=:`, the splice operator. Because of commutativity, the `:>` snoc operator is equivalent to cons on sets. Some examples: `{0,1}:={0,2} == {0,1,2}`; `0<:{1,2} == {0,1,2} == {1,2}:>0`.
+
+Sets in general may not be analyzed with the `@` indexing operator, but in the special case of maps being indexed by one of their keys, the operation evaluates to the value corresponding to that key, eg: `{"nada":0,"wang":1,"tu":2}@"wang" == 1`.
 
 ## User-defined Algebraic Datatypes
 
@@ -95,9 +109,13 @@ String matching: `1 detim arg?="-v";` or `len(h)+len(t) detim s?=h:=:t;`
 
 List matching: `0 detim xs?=[];` or `dfs(graph, h++seen, acc:>h, vedi(graph,h):=:t) detim vs?=h++t;`
 
+Set matching: `0 detim xs?={};` or `dfs(graph, seen, acc, t) detim vs?=h++t && seen?=h<:_ ;`
+
 ### Fong
 
 `Fong` is a bit like Lisp's LET; each `rdecl` is of the form `WIT binding DETING expr` where `binding` is bound to the value of `expr`.
+
+When there are multiple bindings, each `expr` can see the bindings which come below (after) it.
 
 ```
 Du chek (fong cclvi*cclvi
@@ -134,9 +152,17 @@ Da flatten(xss) im fong x
 Du chek flatten([[0],[],[1,2]]) == [0,1,2].
 ```
 
-In general, what in another language might be written as `[x | y<-z, v<-w]` would be expressed in Beltabol as `(fong x wit v delowda w; wit y delowda z)`. Note the change in order! To produce the effect of a guard, use a `delowda` clause which evaluates to either a length-0 list for failure or length-1 list for success.
+In general, what in another language might be written as `[x | y<-z, v<-w]` would be expressed in Beltabol as `(fong x wit v delowda w; wit y delowda z)`. Note the change in order! To produce the effect of a guard, either use a `delowda` clause which evaluates to either a length-0 list for failure or length-1 list for success, or use a refutable pattern in the binding position of the `WIT binding DELOWDA expression` clause.
 
-Note that one can mix `deting` and `delowda` clauses within a single `fong`; the delowdas will act to multiply results but the detings always introduce a single binding (per the delowda's underneath them) only.
+Note that one can mix `deting` and `delowda` clauses within a single `fong`; the delowdas will act to multiply results but the detings always introduce a single binding (per the delowda's underneath them) only. As is usual with the list monad, a fong comprehension expression produces a flattened list of results, no matter how many delowda clauses it has.
+
+```
+Du chek (fong z
+  wit z deting 2*y;
+  wit y delowda [x+1,x-1];
+  wit x delowda [z+1,z+2];
+  wit z deting 0) im [4,0,6,2].
+```
 
 ### Fong/unte for mutual recursion
 
@@ -207,7 +233,6 @@ Line comments go from an opening `//` to the end of line.
 |----|-------|
 |owta| 1 (True)|
 |max(x,y)|**max**imum of **x** and **y**||
-|mebi(f)|returns fn returning [**f**(x)] on success and [] on failure|
 |walowda(f)|returns fn returning the least fixpoint of **f**(**f**(...**f**(x)...))|
 |sqrt(n)|integer square root of **n**||
 |mod(i,j)|i **mod** j|
