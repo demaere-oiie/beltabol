@@ -423,8 +423,8 @@ class Id(PatSyntax):
 
     def eval(self,env):
         r = env.get(self.i,None)
-        if r is None:
-            print("NULL %s" % (self.i,))
+        #if r is None:
+        #    print("NULL %s" % (self.i,))
         return r
 
     def match(self,v,env):

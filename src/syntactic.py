@@ -184,6 +184,7 @@ class FDecl(Box):
             g.e[f.i] = clo
             env[f.i] = clo
         elif (  isinstance(i,PatSyntax) or
+                isinstance(i,OpCOL) or
                 isinstance(i,OpNDX) or
                 isinstance(i,OpCAT) or
                 isinstance(i,OpSPLICE) or
@@ -454,6 +455,14 @@ class OpCONS(BinOp):
             return (self.l.match(v.s[0],env) and
                     self.r.match(List(v.s[1:]),env))
         elif isinstance(v,Set) and len(v.s)>0:
+            q = self.l.eval(env)
+            if q is not None:
+                i = 0
+                while i < len(v.s):
+                    if q.match(v.s[i],env):
+                        return self.r.match(Set(v.s[:i]+v.s[i+1:]),env)
+                    i += 1
+                return False
             return (self.l.match(v.s[0],env) and
                     self.r.match(Set(v.s[1:]),env))
         elif isinstance(v,Str) and len(v.s)>0:
@@ -479,6 +488,14 @@ class OpSNOC(BinOp):
             return (self.l.match(List(v.s[:-1]),env) and
                     self.r.match(v.s[-1],env))
         elif isinstance(v,Set) and len(v.s)>0:
+            q = self.l.eval(env)
+            if q is not None:
+                i = 0
+                while i < len(v.s):
+                    if q.match(v.s[i],env):
+                        return self.r.match(Set(v.s[:i]+v.s[i+1:]),env)
+                    i += 1
+                return False
             return (self.r.match(v.s[0],env) and
                     self.l.match(Set(v.s[1:]),env))
         elif isinstance(v,Str) and len(v.s)>0:

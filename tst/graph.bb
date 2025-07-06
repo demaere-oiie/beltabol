@@ -1,13 +1,9 @@
 // Kosaraju's algorithm for finding strongly connected components
 
 // Ancillary fn's
-Da nub(xs) im fong (chu
-    h<:nub(nawit(h,t)) detim xs?=h<:t;
-    []                 detim owta)
-    wit nawit(y,xs) deting (chu
-        (chu  nawit(y,t) detim h==y;
-           h++nawit(y,t) detim owta) detim xs?=h++t;
-         []                          detim owta).
+Da nub(xs) im fong s2l,l2s $ xs
+    wit s2l(xs) deting (chu h<:s2l(t) detim xs?=h<:t; [] detim owta);
+    wit l2s(xs) deting (chu h<:l2s(t) detim xs?=h<:t; {} detim owta).
 
 Da flatten(xss) im fong x
     wit x  delowda xs;
@@ -30,11 +26,6 @@ Da collect(vs,es) im fong [v, find_edges(v,es)]
         wit w     delowda (chu [t] detim v==s; [] detim owta);
         wit [s,t] delowda es).
 
-Da v `in` xs im chu
-    0        detim xs?=[];
-    1        detim xs?=h++t && h==v;
-    v `in` t detim xs?=h++t.
-
 Da vedi(graph, s) im chu
     []         detim graph?=[];
     ns         detim graph?=h++t && h?=[v,ns] && v==s;
@@ -42,18 +33,18 @@ Da vedi(graph, s) im chu
 
 // Kosaraju's algo
 Da dfs(graph, seen, acc, vs) im chu
-    dfs(graph,    seen, acc   , t) detim vs?=h++t && h `in` seen;
+    dfs(graph,    seen, acc   , t) detim vs?=h++t && seen?=h<:_ ;
     dfs(graph, h++seen, acc:>h, vedi(graph,h):=:t)
                                    detim vs?=h++t;
-    [seen, acc]                    detim owta.
+    seen:acc                       detim owta.
 
-Da pass(graph, vs) im fong wok(graph, [], [], vs)
+Da pass(graph, vs) im fong wok(graph, {}, [], vs)
     wit wok(graph, seen, acc, vs) deting (chu
-      acc            detim vs?=[];
+      acc   detim vs?=[];
      (fong wok(graph, ds, acc1, t)
-        wit acc1       deting (chu acc detim da?=[]; [da]++acc detim owta);
-        wit [ds]++[da] deting dfs(graph, seen, [], [h]))
-		     detim vs?=h++t).
+        wit acc1  deting (chu acc detim da?=[]; [da]++acc detim owta);
+        wit ds:da deting dfs(graph, seen, [], [h]))
+	    detim vs?=h++t).
 
 Da kosaraju(g) im pass(reverse_graph(g),flatten(pass(g,vertices(g)))).
     
