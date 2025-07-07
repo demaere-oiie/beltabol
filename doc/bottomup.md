@@ -82,6 +82,14 @@ Da sh(n) im chu
 
 Limitation: in principle, the algebraic datatypes are totally ordered, but this is currently unimplemented.
 
+## Functions
+
+Functions can be synthesized via composition with `,`, but they cannot be analyzed: apart from passing them to higher-order functions, the only thing to do with them is to apply them to arguments, either via the high-precedence usual syntax `f(x)`, or via the much-lower precedence `f $ x`. Examples: `(f,g)(x) == f(g(x)) == (f $ g $ x)`
+
+(More pedantically, when we say "functions" we are really talking about the *closures* to which they evaluate)
+
+Operators behave like two-argument functions; To use an operator as an identifier, enclose it in parens, eg `(+)`. To use an identifier as an operator, enclose it in backticks, eg `` `mod` ``.
+
 ## Compound Expressions
 
 There are two compound expressions, `chu` compounds and `fong` compounds.
@@ -107,7 +115,7 @@ Da div(n,m) im chu
 
 The match operator, `?=`, which has a low precedence, may be used to extend the expression's environment. It takes a value on its left hand side, and a pattern on its right, and attempts to bind variables in the pattern in such a way as to match the value.
 
-Guards may be composed of multiple clauses, joined by the low-precedence `&&` and operator: `(x \`rep\` ys) detim xs?=[x] && len(ys)==1;`
+Guards may be composed of multiple clauses, joined by the low-precedence `&&` and operator: ``(x `rep` ys) detim xs?=[x] && len(ys)==1;``
 
 ### Example patterns using the `?=` match operator
 
