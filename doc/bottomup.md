@@ -248,7 +248,8 @@ Line comments go from an opening `//` to the end of line.
 |name|purpose|
 |----|-------|
 |owta| 1 (True)|
-|max(x,y)|**max**imum of **x** and **y**||
+|max(x,y)|**max**imum of **x** and **y**|
+|mebi(f)|returns fn returning x if f(x) fails, otherwise f(x)|
 |walowda(f)|returns fn returning the least fixpoint of **f**(**f**(...**f**(x)...))|
 |sqrt(n)|integer square root of **n**||
 |mod(i,j)|i **mod** j|

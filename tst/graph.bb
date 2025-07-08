@@ -10,7 +10,7 @@ Da flatten(xss) im fong x
     wit xs delowda xss.
 
 // represent graph as list of nodes and their neighbors
-Da reverse_graph(graph) im fong collect(vertices(graph),res)
+Da op(graph) im fong collect(vertices(graph),res)
      wit res deting (fong [t,s]
         wit t      delowda ts;
         wit [s,ts] delowda graph).
@@ -32,21 +32,19 @@ Da vedi(graph, s) im chu
     vedi(t, s) detim graph?=h++t.
 
 // Kosaraju's algo
-Da dfs(graph, seen, acc, vs) im chu
-    dfs(graph,    seen, acc   , t) detim vs?=h++t && seen?=h<:_ ;
-    dfs(graph, h++seen, acc:>h, vedi(graph,h):=:t)
-                                   detim vs?=h++t;
-    seen:acc                       detim owta.
-
-Da pass(graph, vs) im fong wok(graph, {}, [], vs)
+Da pass(graph)(vs) im fong wok(graph, {}, [], vs)
     wit wok(graph, seen, acc, vs) deting (chu
-      acc   detim vs?=[];
      (fong wok(graph, ds, acc1, t)
         wit acc1  deting (chu acc detim da?=[]; [da]++acc detim owta);
-        wit ds:da deting dfs(graph, seen, [], [h]))
-	    detim vs?=h++t).
+        wit ds:da deting dfs(graph, seen, [], [h])) detim vs?=h++t;
+     acc                                            detim vs?=[]);
+    wit dfs(graph, seen, acc, vs) deting (chu
+        dfs(graph,    seen, acc   , t) detim vs?=h++t && seen?=h<:_ ;
+        dfs(graph, h++seen, acc:>h, vedi(graph,h):=:t)
+                                       detim vs?=h++t;
+        seen:acc                       detim owta).
 
-Da kosaraju(g) im pass(reverse_graph(g),flatten(pass(g,vertices(g)))).
+Da kosaraju(g) im pass(op(g)),flatten,pass(g),vertices $ g.
     
 Da example_graph im [[1,[2,3]], [2,[4]], [3,[4]], [4,[1]], [5,[6]], [6,[5]]].
 Du chek kosaraju(example_graph) im [[1,4,2,3],[5,6]].

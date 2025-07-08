@@ -26,8 +26,12 @@ class DaIm(Box):
             env[e.i] = self.d.eval(env)
         elif isinstance(e, App):
             f = e.f
+            l = Lambda(e.x, self.d, f.i if isinstance(f,Id) else "(curry)")
+            while isinstance(f,App):
+                e,f = f,f.f
+                l = Lambda(e.x, l, f.i if isinstance(f,Id) else "(curry)")
             assert isinstance(f,Id)
-            clo = Lambda(e.x, self.d, f.i).eval(env)
+            clo = l.eval(env)
             g = clo.s[0]
             assert isinstance(g,Clo)
             g.e[f.i] = clo
@@ -177,8 +181,12 @@ class FDecl(Box):
             env[i.i] = self.e.eval(env)
         elif isinstance(i, App):
             f = i.f
+            l = Lambda(i.x, self.e, f.i if isinstance(f,Id) else "(curry)")
+            while isinstance(f,App):
+                i,f = f,f.f
+                l = Lambda(i.x, l, f.i if isinstance(f,Id) else "(curry)")
             assert isinstance(f,Id)
-            clo = Lambda(i.x, self.e, f.i).eval(env)
+            clo = l.eval(env)
             g = clo.s[0]
             assert isinstance(g,Clo)
             g.e[f.i] = clo
